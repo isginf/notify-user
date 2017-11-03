@@ -24,14 +24,17 @@
 #
 
 help() {
-	echo "Usage: $0 <user|--all> [options]"
+	echo "Usage: $0 (user|--all|--help) [...]"
 	echo
 	echo "This script is a wrapper for notify-send to allow"
 	echo "to notify users as root and/or from a script."
 	echo
-	echo "The first argument defines the user name(s) to be notified"
-	echo "(or --all for logged in users). All other arguments get"
-	echo "passed trough (see notify-send(1))."
+	echo "The first argument defines who receives the notification."
+	echo "--all will sends it to logged in users. Alternatively,"
+	echo "a user name or a space separated list of user names can"
+	echo "be provided."
+	echo
+	echo "See also: notify-send(1)"
 	echo
 	exit 1;
 }
