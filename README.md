@@ -27,7 +27,7 @@ All further arguments will be passed to *notify-send*.
 
 # See also
 
-- [notify-send(1)](https://manpages.debian.org/stretch/libnotify-bin/notify-send.1.en.html).
+- [notify-send(1)](https://manpages.debian.org/stretch/libnotify-bin/notify-send.1.en.html)
 
 # Compatibility
 
