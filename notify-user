@@ -1,0 +1,85 @@
+#!/bin/bash
+
+#
+# Copyright 2017 ETH Zurich, D-INFK ISG, Manuel Mästinger
+# Email: manuel.maestinger@inf.ethz.ch
+# Web: https://www.isg.inf.ethz.ch
+#
+# This is free software: you can redistribute it and/or modify
+# it under the terms of the GNU General Public License as published by
+# the Free Software Foundation, either version 3 of the License, or
+# (at your option) any later version.
+#
+# It is distributed in the hope that it will be useful,
+# but WITHOUT ANY WARRANTY; without even the implied warranty of
+# MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+# GNU General Public License for more details.
+#
+# You should have received a copy of the GNU General Public License.
+# If not, see <http://www.gnu.org/licenses/>.
+#
+
+#
+# Help
+#
+
+help() {
+	echo "Usage: $0 <user|--all> [options]"
+	echo
+	echo "This script is a wrapper for notify-send to allow"
+	echo "to notify users as root and/or from a script."
+	echo
+	echo "The first argument defines the user name(s) to be notified"
+	echo "(or --all for logged in users). All other arguments get"
+	echo "passed trough (see notify-send(1))."
+	echo
+	exit 1;
+}
+
+[ "$1" = "--help" ] && help
+[ -z "$1" ] && help
+
+#
+# Arguments and variables
+#
+
+USERS="$1"
+[ "$USERS" = "--all" ] && USERS="$(who |cut -d" " -f1 |sort |uniq)"
+shift
+
+pushd $(dirname $0) >/dev/null
+THIS="$(cd "$(dirname "$0")"; pwd -P)/$(basename $0)"
+popd >/dev/null
+
+#
+# Notification logic
+#
+
+for u in $USERS; do
+	if who | grep -qe "^$u"; then
+		if [ "$EUID" -eq "0" ] && [ "$u" != "root" ]; then
+			#
+			# Started as root, drop to user and run again
+			#
+			su "$u" -l -- "$THIS" "$u" "$@"
+		else
+			if [ "$u" = "$USER" ]; then
+				#
+				# For every unique value of $DBUS_SESSION_BUS_ADDRESS in all user processes
+				#
+				for b in $(for p in $(ps h -o pid); do [ -r /proc/$p/environ ] && grep -ze '^DBUS_SESSION_BUS_ADDRESS=.*' /proc/$p/environ |sed -re 's/DBUS_SESSION_BUS_ADDRESS=([^\x00]+)\x00.*/\1\n/g'; done |sort |uniq); do
+					#
+					# Notify
+					#
+					DBUS_SESSION_BUS_ADDRESS="$b" notify-send "$@"
+				done
+			else
+				echo "Only root can send notifications to other users!"
+				exit 1
+			fi
+		fi
+	else
+		echo "User $u is not logged in!"
+		exit 1
+	fi
+done
