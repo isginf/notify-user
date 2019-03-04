@@ -70,7 +70,7 @@ for u in $USERS; do
 				#
 				# For every unique value of $DBUS_SESSION_BUS_ADDRESS in all user processes
 				#
-				for b in $(for p in $(ps h -o pid -u "$u"); do [ -r /proc/$p/environ ] && grep -ze '^DBUS_SESSION_BUS_ADDRESS=.*' /proc/$p/environ |sed -re 's/DBUS_SESSION_BUS_ADDRESS=([^\x00]+)\x00.*/\1\n/g'; done |cut -d, -f1 |sort |uniq); do
+				for b in $(for p in $(ps h -o pid -u "$u"); do [ -r /proc/$p/environ ] && grep -ze '^DBUS_SESSION_BUS_ADDRESS=.*' /proc/$p/environ |sed -re 's/DBUS_SESSION_BUS_ADDRESS=([^\x00]+)\x00.*/\1\n/g'; done |cut -d, -f1 |sort -u); do
 					#
 					# Notify
 					#
