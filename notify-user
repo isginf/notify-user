@@ -47,7 +47,7 @@ help() {
 #
 
 USERS="$1"
-[ "$USERS" = "--all" ] && USERS="$(who |cut -d" " -f1 |sort |uniq)"
+[ "$USERS" = "--all" ] && USERS="$(who |cut -d" " -f1 |sort -u)"
 shift
 
 pushd $(dirname $0) >/dev/null
